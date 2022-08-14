@@ -9,12 +9,58 @@ WEBSITE_PORT=3000
 
 # the directory containing the script file
 dir="$(cd "$(dirname "$0")"; pwd)"
+
+COLOR_RED="\033[0;31m"
+COLOR_YELLOW="\033[0;33m"
+COLOR_GREEN="\033[0;32m"
+COLOR_OCHRE="\033[38;5;95m"
+COLOR_BLUE="\033[0;34m"
+COLOR_WHITE="\033[0;37m"
+COLOR_RESET="\033[0m"
+
 cd "$dir"
 
-log()   { echo -e "\e[30;47m ${1^^} \e[0m ${@:2}"; }        # $1 uppercase background white
-info()  { echo -e "\e[48;5;28m ${1^^} \e[0m ${@:2}"; }      # $1 uppercase background green
-warn()  { echo -e "\e[48;5;202m ${1^^} \e[0m ${@:2}" >&2; } # $1 uppercase background orange
-error() { echo -e "\e[48;5;196m ${1^^} \e[0m ${@:2}" >&2; } # $1 uppercase background red
+log()   { 
+    # -u operation = $1
+    declare -u operation
+
+    operation=$1
+
+    echo "$operation $2"
+    echo -e "$COLOR_OCHRE ${operation} $COLOR_RESET ${@:2}" >&2;    
+}
+
+
+info()  { 
+    ## first value
+    declare -u operation = $1
+
+    ## second value
+    stValue=@:$2
+
+    echo "$operation $stValue"
+ 
+    echo -e "\e[48;5;28m ${operation} \e[0m ${@:2}";    
+    
+}      # $1 uppercase background green
+warn()  { 
+    # -u operation = $1
+    declare -u operation
+
+    operation=$1
+
+    echo "$operation $2"
+    echo -e "$COLOR_OCHRE ${operation} $COLOR_RESET ${@:2}" >&2; 
+ } # $1 uppercase background orange
+error() { 
+    # -u operation = $1
+    declare -u operation
+
+    operation=$1
+
+    echo "$operation $2"
+    echo -e "$COLOR_OCHRE ${operation} $COLOR_RESET ${@:2}" >&2; 
+ } # $1 uppercase background red
 
 # log $1 in underline then $@ then a newline
 under() {
@@ -27,6 +73,15 @@ under() {
 usage() {
     under usage 'call the Makefile directly: make dev
       or invoke this file directly: ./make.sh dev'
+}
+
+logSomething() {
+    if [[ -z $(which eksctl) ]]
+    then
+        log skip eksctl eksctl not found
+    else
+        log skip eksctl already installed
+    fi
 }
 
 # install eksctl if missing (no update)
@@ -166,6 +221,7 @@ setup() {
     install-kubectl
     install-yq
     create-env
+    # logSomething
 }
 
 # local development (by calling npm script directly)
